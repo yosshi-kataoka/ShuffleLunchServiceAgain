@@ -15,7 +15,7 @@ class Application
   {
     $this->router = new Router($this->registerRouters());
     $this->request = new Request();
-    // $this->response = new Response();
+    $this->response = new Response();
     // $this->databaseManager = new DatabaseManager();
     // $dotenv = Dotenv\Dotenv::createImmutable(__DIR__  . '/');
     // $dotenv->load();
@@ -40,5 +40,14 @@ class Application
     return [
       '/' => ['controller' => 'shuffle', 'action' => 'index']
     ];
+  }
+
+  private function render404Page()
+  {
+    $this->response->setStatusCode('404', 'Page Not Found');
+    ob_start();
+    // todo require __DIR__  ページが見つからないことを表示するページを今後作成し、こちらを読み込む
+    $content = ob_get_clean();
+    $this->response->setContent($content);
   }
 }
