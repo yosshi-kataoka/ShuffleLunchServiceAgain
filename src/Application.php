@@ -3,6 +3,7 @@
 namespace ShuffleLunchService;
 
 use Dotenv;
+use HttpNotFoundException;
 
 class Application
 {
@@ -31,8 +32,20 @@ class Application
 
   public function run()
   {
+
     $path = $this->request->getPathInfo();
-    $params = $this->router->resolve($path);
+    try {
+      $params = $this->router->resolve($path);
+      if (!$params) {
+        throw new HttpNotFoundException('アクセスされたページが見つかりません。');
+      }
+      $controller = $params['controller'];
+      $action = $params['action'];
+    } catch (HttpNotFoundException $e) {
+      error_log('Error' . $e->getMessage());
+      $this->render404Page();
+    }
+    $this->response->send();
   }
 
   private function registerRouters()
@@ -46,7 +59,7 @@ class Application
   {
     $this->response->setStatusCode('404', 'Page Not Found');
     ob_start();
-    // todo require __DIR__  ページが見つからないことを表示するページを今後作成し、こちらを読み込む
+    require __DIR__ . '/views/pageNotFound.php';
     $content = ob_get_clean();
     $this->response->setContent($content);
   }
