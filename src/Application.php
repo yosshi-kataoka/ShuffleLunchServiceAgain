@@ -41,6 +41,7 @@ class Application
       }
       $controller = $params['controller'];
       $action = $params['action'];
+      $this->runAction($controller, $action);
     } catch (HttpNotFoundException $e) {
       error_log('Error' . $e->getMessage());
       $this->render404Page();
@@ -53,6 +54,17 @@ class Application
     return [
       '/' => ['controller' => 'shuffle', 'action' => 'index']
     ];
+  }
+
+  private function runAction($controller, $action)
+  {
+    $controllerName = ucFirst($controller) . 'controller';
+    if (!class_exists($controllerName)) {
+      throw new HttpNotFoundException('アクセスされたコントローラーが見つかりません。');
+    }
+    $controller = new $controllerName();
+    $content = $controller->run($action);
+    $this->response->setContent($content);
   }
 
   private function render404Page()
